@@ -1,4 +1,4 @@
-/* Telemetria Veicular - dois veiculos, tres sessoes por veiculo. */
+/* Telemetria Veicular */
 const CHAVE = 'telemetria_v3';
 const CHAVE_RESULTADO = 'telemetria_resultado_v3';
 const MAX_ESCALA = 240;
@@ -15,7 +15,7 @@ function salvar() { localStorage.setItem(CHAVE, JSON.stringify(estado)); }
 function mostrar(nome) { ['cadastro', 'entrada', 'dashboard'].forEach(v => $('view-' + v).classList.add('hidden')); $('view-' + nome).classList.remove('hidden'); window.scrollTo(0, 0); }
 function aviso(id, texto, erro = false) { const el = $(id); el.textContent = texto; el.style.color = erro ? '' : 'var(--verde-claro)'; el.classList.remove('hidden'); }
 
-/* ---------- cadastro dos dois veiculos ---------- */
+// cadastro de veículos
 function lerCarro(prefixo) { return { modelo: $(`${prefixo}-modelo`).value.trim(), placa: $(`${prefixo}-placa`).value.trim().toUpperCase(), km: parseFloat($(`${prefixo}-km`).value) }; }
 $('btn-cadastrar').onclick = () => {
   const carros = [lerCarro('cad-1'), lerCarro('cad-2')];
@@ -33,7 +33,7 @@ function renderCabecalho() {
 }
 function iniciarEntrada() { renderCabecalho(); renderTabela(); mostrar('entrada'); }
 
-/* ---------- tabela de medicoes ---------- */
+// tabela
 function linhasNumericas() { return estado.rows.map(r => ({ tempo: parseFloat(r.tempo), vel: parseFloat(r.vel), temp: parseFloat(r.temp), rpm: parseFloat(r.rpm) })); }
 function aceleracoes(linhas) { return linhas.map((r, i) => { if (i === 0) return 0; const dt = r.tempo - linhas[i - 1].tempo; return dt > 0 ? ((r.vel - linhas[i - 1].vel) / 3.6) / dt : NaN; }); }
 function renderTabela() {
@@ -59,10 +59,70 @@ function validar() {
 }
 $('btn-validar').onclick = () => { if (validar()) aviso('aviso-erro', 'Dados válidos - prontos para salvar.'); };
 
-/* ---------- processamento de uma sessao ---------- */
 function distancia(linhas) { let total = 0; for (let i = 1; i < linhas.length; i++) total += ((linhas[i].vel + linhas[i - 1].vel) / 2) * ((linhas[i].tempo - linhas[i - 1].tempo) / 3600); return total; }
 function processar(linhas) { const acels = aceleracoes(linhas), medidas = acels.slice(1).filter(Number.isFinite), car = carroAtual(); const stats = { velMedia: linhas.reduce((s, r) => s + r.vel, 0) / linhas.length, vMax: Math.max(...linhas.map(r => r.vel)), tempMedia: linhas.reduce((s, r) => s + r.temp, 0) / linhas.length, acelMedia: medidas.length ? medidas.reduce((s, a) => s + a, 0) / medidas.length : 0, acels, distPercorrida: distancia(linhas) }; car.km += stats.distPercorrida; return { car: { ...car }, carId: car.id, linhas, stats, geradoEm: Date.now() }; }
-function enviarParaNuvem(linhas) { return new Promise(resolve => setTimeout(() => resolve(processar(linhas)), 400)); }
+
+async function enviarParaNuvem(linhas) {
+
+  const numeroVeiculo = estado.currentCar + 1;
+
+  const respostaSessao = await fetch(
+    'http://127.0.0.1:8000/sessions',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        nome_teste: `Teste Veículo ${numeroVeiculo} - ${Date.now()}`,
+        id_car: numeroVeiculo,
+        data_teste: new Date().toISOString().split('T')[0],
+        descricao: 'Teste de telemetria realizado pelo frontend'
+      })
+    }
+  );
+
+  if (!respostaSessao.ok) {
+    const erro = await respostaSessao.json();
+
+    throw new Error(
+      erro.detail || 'Erro ao criar a sessão de teste.'
+    );
+  }
+
+  const dadosSessao = await respostaSessao.json();
+
+  const idSessao = dadosSessao.id_sessao;
+
+  for (const linha of linhas) {
+
+    const resposta = await fetch(
+      'http://127.0.0.1:8000/measurements',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id_sessao: idSessao,
+          time: Math.round(linha.tempo),
+          speed: linha.vel,
+          motor_temp: linha.temp,
+          accel: 0
+        })
+      }
+    );
+
+    if (!resposta.ok) {
+      const erro = await resposta.json();
+
+      throw new Error(
+        erro.detail || 'Erro ao enviar medição para a API.'
+      );
+    }
+  }
+  return processar(linhas);
+}
 $('btn-compilar').onclick = async () => {
   const linhas = validar(); if (!linhas?.length) return; const btn = $('btn-compilar'); btn.disabled = true; aviso('aviso-nuvem', 'Salvando sessão de teste...');
   const resultado = await enviarParaNuvem(linhas); estado.results = estado.results.filter(r => r.carId !== resultado.carId).concat(resultado); salvar(); localStorage.setItem(CHAVE_RESULTADO, JSON.stringify(estado.results));
@@ -71,7 +131,7 @@ $('btn-compilar').onclick = async () => {
 };
 $('btn-voltar').onclick = () => { estado.currentCar = Number($('dash-car-select').value || 0); estado.rows = estado.results.find(r => r.carId === carroAtual().id)?.linhas.map(r => ({ tempo: String(r.tempo), vel: String(r.vel), temp: String(r.temp), rpm: String(r.rpm || '') })) || [novaLinha(0), novaLinha(1), novaLinha(2)]; iniciarEntrada(); };
 
-/* ---------- dashboard comparativo ---------- */
+// dashboard e gráficos
 function renderComparacao() {
   const resultados = estado.cars.map(car => estado.results.find(r => r.carId === car.id));
   $('compare-car-1').textContent = `${estado.cars[0].modelo} · km/h`;
