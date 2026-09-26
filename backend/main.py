@@ -8,7 +8,6 @@ from sqlalchemy.exc import IntegrityError
 
 from backend.database import engine
 
-
 app = FastAPI(title="Telemetria API")
 
 app.add_middleware(
