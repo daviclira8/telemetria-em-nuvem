@@ -1,11 +1,11 @@
-const CHAVE = "telemetria_v3";
-const CHAVE_RESULTADO = "telemetria_resultado_v3";
-const MAX_ESCALA = 240;
-const TOTAL_VEICULOS = 2;
-const TOTAL_LINHAS = 3;
+const CHAVE = "telemetria_v3"; // Define a chave de armazenamento local para o estado da aplicação.
+const CHAVE_RESULTADO = "telemetria_resultado_v3"; // Define a chave de armazenamento local específica para os resultados salvos.
+const MAX_ESCALA = 240; // Define a velocidade máxima permitida na escala do velocímetro (240 km/h).
+const TOTAL_VEICULOS = 2; // Define a quantidade total de veículos avaliados no fluxo de teste.
+const TOTAL_LINHAS = 3; // Define o número padrão de linhas/testes por veículo.
 
 function novaLinha(tempo) {
-  return { tempo: String(tempo), vel: "", temp: "", rpm: "" };
+  return { tempo: String(tempo), vel: "", temp: "", rpm: "" }; // Cria e retorna um objeto estruturado para uma nova linha de medição vazia.
 }
 function estadoInicial() {
   return {
@@ -13,34 +13,34 @@ function estadoInicial() {
     currentCar: 0,
     rows: [novaLinha(0), novaLinha(1), novaLinha(2)],
     results: [],
-  };
+  }; // Retorna o objeto de estado inicial padrão do sistema com três linhas zeradas.
 }
 function carregar() {
   try {
     const salvo = JSON.parse(localStorage.getItem(CHAVE));
-    return salvo && Array.isArray(salvo.cars) ? salvo : estadoInicial();
+    return salvo && Array.isArray(salvo.cars) ? salvo : estadoInicial(); // Tenta carregar e analisar os dados salvos no navegador, ou retorna o estado padrão se falhar.
   } catch {
     return estadoInicial();
   }
 }
-let estado = carregar();
-const $ = (id) => document.getElementById(id);
-const fmt = (n, c = 2) => Number(n).toFixed(c);
+let estado = carregar(); // Inicializa a variável global de estado com os dados recuperados ou o padrão inicial.
+const $ = (id) => document.getElementById(id); // Cria um atalho prático para selecionar elementos do DOM por ID.
+const fmt = (n, c = 2) => Number(n).toFixed(c); // Formata um número para uma quantidade específica de casas decimais.
 function salvar() {
-  localStorage.setItem(CHAVE, JSON.stringify(estado));
+  localStorage.setItem(CHAVE, JSON.stringify(estado)); // Salva o estado atual da aplicação serializado em JSON no armazenamento local.
 }
 function mostrar(nome) {
   ["entrada", "dashboard"].forEach((v) =>
     $("view-" + v).classList.add("hidden"),
   );
   $("view-" + nome).classList.remove("hidden");
-  window.scrollTo(0, 0);
+  window.scrollTo(0, 0); // Alterna a exibição entre as telas principais da aplicação e rola a página para o topo.
 }
 function aviso(id, texto, erro = false) {
   const el = $(id);
   el.textContent = texto;
   el.style.color = erro ? "var(--vermelho)" : "var(--verde-claro)";
-  el.classList.remove("hidden");
+  el.classList.remove("hidden"); // Exibe mensagens de aviso ou erro estilizadas em um elemento específico do DOM.
 }
 
 // cadastro do veículo (agora feito junto com a tela de testes)
@@ -50,10 +50,10 @@ function lerCarroEntrada() {
     placa: $("ent-placa").value.trim().toUpperCase(),
     km: parseFloat($("ent-km").value),
     dataTeste: $("ent-data").value,
-  };
+  }; // Lê e retorna os dados cadastrais do veículo preenchidos nos campos de entrada.
 }
 function carroAtual() {
-  return estado.cars[estado.currentCar];
+  return estado.cars[estado.currentCar]; // Retorna o objeto correspondente ao veículo selecionado no momento.
 }
 function renderCabecalho() {
   const car = carroAtual();
@@ -74,12 +74,12 @@ function renderCabecalho() {
   $("btn-compilar").textContent =
     estado.currentCar === TOTAL_VEICULOS - 1
       ? "Concluir e comparar"
-      : "Salvar veículo e continuar →";
+      : "Salvar veículo e continuar →"; // Atualiza dinamicamente os textos, títulos e inputs do cabeçalho da tela de entrada.
 }
 function iniciarEntrada() {
   renderCabecalho();
   renderTabela();
-  mostrar("entrada");
+  mostrar("entrada"); // Prepara e exibe a tela de cadastro e inserção de dados do veículo.
 }
 
 // tabela
@@ -89,14 +89,14 @@ function linhasNumericas() {
     vel: parseFloat(r.vel),
     temp: parseFloat(r.temp),
     rpm: parseFloat(r.rpm),
-  }));
+  })); // Converte os valores textuais da tabela de testes em números para cálculos.
 }
 function aceleracoes(linhas) {
   return linhas.map((r, i) => {
     if (i === 0) return 0;
     const dt = r.tempo - linhas[i - 1].tempo;
     return dt > 0 ? (r.vel - linhas[i - 1].vel) / 3.6 / dt : NaN;
-  });
+  }); // Calcula a aceleração instantânea entre as linhas com base na variação de velocidade e tempo.
 }
 function renderTabela() {
   const tb = $("tbody");
@@ -113,7 +113,7 @@ function renderTabela() {
     );
     tb.appendChild(tr);
   });
-  atualizarAceleracaoColuna();
+  atualizarAceleracaoColuna(); // Renderiza dinamicamente as linhas da tabela de testes e atribui os ouvintes de eventos de salvamento.
 }
 function atualizarAceleracaoColuna() {
   const linhas = linhasNumericas(),
@@ -131,14 +131,14 @@ function atualizarAceleracaoColuna() {
           : j >= 0 && !isNaN(acels[j])
             ? fmt(acels[j])
             : "erro";
-    });
+    }); // Atualiza em tempo real os valores calculados de aceleração exibidos na tabela.
 }
 $("btn-limpar").onclick = () => {
   estado.rows = [novaLinha(0), novaLinha(1), novaLinha(2)];
   salvar();
   renderTabela();
   $("aviso-erro").classList.add("hidden");
-};
+}; // Reseta as linhas da tabela para o valor padrão ao clicar no botão de limpar.
 
 function validar() {
   const linhas = linhasNumericas(),
@@ -179,11 +179,11 @@ function validar() {
     return null;
   }
   $("aviso-erro").classList.add("hidden");
-  return linhas;
+  return linhas; // Valida rigorosamente todos os campos preenchidos na tabela, destacando erros e inconsistências.
 }
 $("btn-validar").onclick = () => {
   if (validar()) aviso("aviso-erro", "Dados válidos - prontos para salvar.");
-};
+}; // Aciona a validação dos dados da tabela e exibe feedback visual de sucesso.
 
 function distancia(linhas) {
   let total = 0;
@@ -191,7 +191,7 @@ function distancia(linhas) {
     total +=
       ((linhas[i].vel + linhas[i - 1].vel) / 2) *
       ((linhas[i].tempo - linhas[i - 1].tempo) / 3600);
-  return total;
+  return total; // Calcula a distância total percorrida com base na integração trapezoidal da velocidade pelo tempo.
 }
 function processar(linhas) {
   const acels = aceleracoes(linhas),
@@ -214,14 +214,14 @@ function processar(linhas) {
     linhas,
     stats,
     geradoEm: Date.now(),
-  };
+  }; // Processa as estatísticas gerais do teste (médias, máximas e nova quilometragem do veículo).
 }
 
 async function enviarParaNuvem(linhas) {
   const numeroVeiculo = estado.currentCar + 1;
   const car = carroAtual();
 
-  const respostaSessao = await fetch("/api/sessions", {
+  const respostaSessao = await fetch("http://127.0.0.1:8000/api/sessions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -245,7 +245,7 @@ async function enviarParaNuvem(linhas) {
   const idSessao = dadosSessao.id_sessao;
 
   for (const linha of linhas) {
-    const resposta = await fetch("/api/measurements", {
+    const resposta = await fetch("http://127.0.0.1:8000/api/measurements", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -265,7 +265,7 @@ async function enviarParaNuvem(linhas) {
       throw new Error(erro.detail || "Erro ao enviar medição para a API.");
     }
   }
-  return processar(linhas);
+  return processar(linhas); // Envia assincronamente as sessões e medições recolhidas para a API backend por HTTP POST.
 }
 $("btn-compilar").onclick = async () => {
   const dadosCarro = lerCarroEntrada();
@@ -319,7 +319,7 @@ $("btn-compilar").onclick = async () => {
     mostrar("dashboard");
     renderResumo();
   }
-};
+}; // Gerencia o evento de submissão do formulário, enviando os dados para a nuvem e avançando de veículo ou abrindo o dashboard.
 $("btn-voltar").onclick = () => {
   estado.currentCar = Number($("dash-car-select").value || 0);
   estado.rows = estado.results
@@ -330,14 +330,14 @@ $("btn-voltar").onclick = () => {
       temp: String(r.temp),
       rpm: String(r.rpm || ""),
     })) || [novaLinha(0), novaLinha(1), novaLinha(2)];
-  iniciarEntrada();
+  startEntrada(); // Retorna do dashboard para a tela de edição de medições de um veículo específico.
 };
 
 // dashboard e gráficos
 function fmtData(iso) {
   if (!iso) return "—";
   const [y, m, d] = iso.split("-");
-  return `${d}/${m}/${y}`;
+  return `${d}/${m}/${y}`; // Formata uma data no padrão ISO para o formato brasileiro (DD/MM/AAAA).
 }
 function renderComparacao() {
   const resultados = estado.cars.map((car) =>
@@ -345,7 +345,6 @@ function renderComparacao() {
   );
   const [c1, c2] = estado.cars;
 
-  // Atualiza os cabeçalhos das colunas com o modelo de cada carro
   $("compare-data-1").textContent = `DATA · ${c1.modelo}`;
   $("compare-data-2").textContent = `DATA · ${c2.modelo}`;
   $("compare-tempo-1").textContent = `TEMPO (S) · ${c1.modelo}`;
@@ -357,7 +356,6 @@ function renderComparacao() {
   $("compare-acel-1").textContent = `ACELERAÇÃO · ${c1.modelo}`;
   $("compare-acel-2").textContent = `ACELERAÇÃO · ${c2.modelo}`;
 
-  // Preenche as linhas intercalando os dados do Carro 1 e Carro 2
   $("comparacao").innerHTML = Array.from({ length: TOTAL_LINHAS }, (_, i) => {
     const a = resultados[0].linhas[i],
       b = resultados[1].linhas[i];
@@ -381,7 +379,7 @@ function renderComparacao() {
     .map((c, i) => `<option value="${i}">${c.modelo} • ${c.placa}</option>`)
     .join("");
   $("dash-car-select").onchange = renderResumo;
-  renderResumo();
+  renderResumo(); // Renderiza a tabela comparativa detalhada entre os dois veículos testados.
 }
 function renderResumo() {
   const car = estado.cars[Number($("dash-car-select").value || 0)],
@@ -403,7 +401,7 @@ function renderResumo() {
     Math.min((stats.vMax / MAX_ESCALA) * 100, 100) + "%";
   $("bar-temp").style.width =
     Math.min((stats.tempMedia / 150) * 100, 100) + "%";
-  desenharGraficos(resultado);
+  desenharGraficos(resultado); // Atualiza os blocos de resumo estatístico e barras de progresso no dashboard.
 }
 function desenharGraficos(resultado) {
   if (!resultado) return;
@@ -425,7 +423,7 @@ function desenharGraficos(resultado) {
     linhas.map((r) => [r.tempo, r.temp]),
     "#f59e0b",
     "°C",
-  );
+  ); // Prepara os conjuntos de dados para a renderização dos gráficos canvas de velocidade, aceleração e temperatura.
 }
 let animId = null;
 function animarVelocimetro(alvo) {
@@ -445,7 +443,7 @@ function animarVelocimetro(alvo) {
     if (p < 1) animId = requestAnimationFrame(frame);
     else num.dataset.v = alvo;
   }
-  animId = requestAnimationFrame(frame);
+  animId = requestAnimationFrame(frame); // Anima suavemente o ponteiro e o número do velocímetro SVG na tela.
 }
 (function ticks() {
   const g = $("ticks");
@@ -459,7 +457,7 @@ function animarVelocimetro(alvo) {
     if (principal)
       g.innerHTML += `<text x="${150 + 84 * Math.cos(ang)}" y="${150 + 84 * Math.sin(ang)}" fill="#8b96a3" font-size="14" font-weight="700" font-family="JetBrains Mono" text-anchor="middle" dominant-baseline="middle">${m * 20}</text>`;
   }
-})();
+})(); // Desenha estaticamente os traços e marcações numéricas da escala do velocímetro SVG.
 function desenharGrafico(cv, pts, cor, unid) {
   const pontos = pts.filter(
     (p) => Number.isFinite(p[0]) && Number.isFinite(p[1]),
@@ -507,7 +505,7 @@ function desenharGrafico(cv, pts, cor, unid) {
     ctx.fill();
   });
   ctx.fillStyle = "#8b96a3";
-  ctx.fillText(unid, w - P.r - 34, P.t + 2);
+  ctx.fillText(unid, w - P.r - 34, P.t + 2); // Renderiza linhas e pontos de um gráfico dinâmico em um elemento HTML5 Canvas.
 }
 $("btn-graficos").onclick = () => {
   const g = $("graficos");
@@ -516,7 +514,7 @@ $("btn-graficos").onclick = () => {
     ? "Mostrar gráficos ▾"
     : "Esconder gráficos ▴";
   if (!g.classList.contains("hidden")) renderResumo();
-};
+}; // Alterna a visibilidade da seção de gráficos analíticos ao clicar no botão correspondente.
 
 if (
   estado.cars.length === TOTAL_VEICULOS &&
@@ -525,7 +523,7 @@ if (
   renderComparacao();
   mostrar("dashboard");
   renderResumo();
-} else iniciarEntrada();
+} else iniciarEntrada(); // Verifica o estado salvo ao carregar a página para decidir se exibe o dashboard ou o cadastro inicial.
 
 // Botão para resetar todo o sistema
 $("btn-reset").onclick = () => {
@@ -540,4 +538,4 @@ $("btn-reset").onclick = () => {
     estado = estadoInicial();
     window.location.reload();
   }
-};
+}; // Limpa todo o armazenamento local e reinicia o sistema mediante confirmação do usuário.
