@@ -221,7 +221,7 @@ async function enviarParaNuvem(linhas) {
   const numeroVeiculo = estado.currentCar + 1;
   const car = carroAtual();
 
-  const respostaSessao = await fetch("http://127.0.0.1:8000/sessions", {
+  const respostaSessao = await fetch("/api/sessions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -245,7 +245,7 @@ async function enviarParaNuvem(linhas) {
   const idSessao = dadosSessao.id_sessao;
 
   for (const linha of linhas) {
-    const resposta = await fetch("http://127.0.0.1:8000/measurements", {
+    const resposta = await fetch("/api/measurements", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -534,11 +534,9 @@ $("btn-reset").onclick = () => {
   );
 
   if (confirmacao) {
-    // Limpa os dados salvos no navegador
     localStorage.removeItem(CHAVE);
     localStorage.removeItem(CHAVE_RESULTADO);
 
-    // Zera o estado e recarrega a página para o padrão inicial
     estado = estadoInicial();
     window.location.reload();
   }
