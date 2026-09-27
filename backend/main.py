@@ -1,4 +1,8 @@
 from datetime import date
+#Teste
+import traceback
+from fastapi.responses import JSONResponse
+from fastapi.requests import Request
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -123,3 +127,13 @@ def create_measurement(measurement: Measurement):
         "message": "Medição armazenada com sucesso!",
         "data": measurement
     }
+
+@app.exception_handler(Exception)
+async def debug_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": f"{type(exc).__name__}: {exc}",
+            "traceback": traceback.format_exc(),
+        },
+    )
