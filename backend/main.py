@@ -38,7 +38,7 @@ class SessionCreate(BaseModel):
     data_teste: date
     descricao: str | None = None
 
-@app.get("/")
+@app.get("/api")
 def home():
     with engine.connect() as connection:
         result = connection.execute(text("SELECT 1"))
@@ -48,7 +48,7 @@ def home():
         "database_test": result.scalar()
     }
 
-@app.post("/sessions")
+@app.post("/api/sessions")
 def create_session(session: SessionCreate):
     sql = text("""
         INSERT INTO sessoes_teste
@@ -86,7 +86,7 @@ def create_session(session: SessionCreate):
         "id_sessao": id_sessao
     }
 
-@app.post("/measurements")
+@app.post("/api/measurements")
 def create_measurement(measurement: Measurement):
     sql = text("""
         INSERT INTO telemetria_motor
