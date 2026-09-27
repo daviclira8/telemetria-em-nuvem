@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
-from database import engine
+from .database import engine
 
 app = FastAPI(title="Telemetria API")
 
