@@ -1,190 +1,307 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Telemetria Veicular</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<header class="topo">
-  <div class="topo-logo">
-    <span class="logo-marca"></span>
-    <div>
-      <h1>TELEMETRIA VEICULAR</h1>
-      <p class="sub">Sistema de aquisição e análise de dados do sensor</p>
-    </div>
-  </div>
-  <div id="chip-veiculo" class="chip-veiculo hidden"></div>
-</header>
-
-<main>
-
-  <!-- ======= TELA 1: CADASTRO DO VEÍCULO ======= -->
-  <section id="view-cadastro" class="hidden">
-    <div class="card card-cadastro">
-      <h2>CADASTRO DOS VEÍCULOS</h2>
-      <p class="card-sub">Cadastre os dois veículos para registrar três testes de cada um e comparar os resultados.</p>
-      <div class="form-grid">
-        <label>Veículo 1 · Modelo
-          <input id="cad-1-modelo" type="text" placeholder="Ex.: Toyota Corolla XEI 2003" autocomplete="off">
-        </label>
-        <label>Veículo 1 · Placa
-          <input id="cad-1-placa" type="text" placeholder="ABC-1D23" maxlength="8" autocomplete="off">
-        </label>
-        <label>Veículo 1 · Quilometragem inicial (km)
-          <input id="cad-1-km" type="number" min="0" step="0.1" placeholder="Ex.: 45230">
-        </label>
-        <label>Veículo 2 · Modelo
-          <input id="cad-2-modelo" type="text" placeholder="Ex.: BYD Dolphin Mini 2027" autocomplete="off">
-        </label>
-        <label>Veículo 2 · Placa
-          <input id="cad-2-placa" type="text" placeholder="DEF-2E34" maxlength="8" autocomplete="off">
-        </label>
-        <label>Veículo 2 · Quilometragem inicial (km)
-          <input id="cad-2-km" type="number" min="0" step="0.1" placeholder="Ex.: 1200">
-        </label>
-      </div>
-      <p id="cad-erro" class="erro hidden"></p>
-      <button id="btn-cadastrar" class="btn btn-verde btn-grande">Cadastrar veículos e iniciar testes →</button>
-    </div>
-  </section>
-
-  <!-- ======= TELA 2: ENTRADA DE DADOS (TABELA) ======= -->
-  <section id="view-entrada" class="hidden">
-
-    <div class="card card-km">
-      <div>
-        <span class="label-mini">VEÍCULO</span>
-        <strong id="km-modelo">—</strong>
-        <span id="km-placa" class="placa">—</span>
-      </div>
-      <div class="km-box">
-        <span class="label-mini">QUILOMETRAGEM</span>
-        <div class="km-linha">
-          <span id="km-valor" class="km-digitos">0</span><span class="km-unid">km</span>
-        </div>
-      </div>
-      <span class="km-calculada">Atualizada pelo cálculo das medições</span>
-    </div>
-
-    <div class="card">
-      <div class="card-head">
-        <div><h2 id="test-title">TESTE 1 DE 3</h2><p id="test-subtitle" class="card-sub">Veículo 1</p></div>
-        <div class="head-acoes">
-          <button id="btn-limpar" class="btn btn-perigo-fantasma">Limpar Tudo</button>
-        </div>
-      </div>
-
-      <div class="tabela-wrap">
-        <table class="tabela">
-          <thead>
-            <tr>
-              <th>TESTE</th><th>TEMPO (S)</th><th>VELOCIDADE</th>
-              <th>TEMP. MOTOR</th><th>ACELERAÇÃO</th><th>FORÇA DE GIRO</th><th>AÇÕES</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-
-      <div id="aviso-erro" class="aviso-erro hidden"></div>
-      <div id="aviso-nuvem" class="aviso-nuvem hidden"></div>
-
-      <div class="acoes-fim">
-        <button id="btn-validar" class="btn btn-fantasma">Validar Dados</button>
-        <button id="btn-compilar" class="btn btn-verde">Salvar teste e continuar →</button>
-      </div>
-    </div>
-
-    <div class="nota-calculada">
-      <h3>ACELERAÇÃO<span class="tag">CALCULADA ENTRE LINHAS</span></h3>
-    </div>
-  </section>
-
-  <!-- ======= TELA 3: DASHBOARD ======= -->
-  <section id="view-dashboard" class="hidden">
-
-    <div class="card card-km">
-      <div class="dashboard-heading">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Telemetria Veicular</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topo">
+      <div class="topo-logo">
+        <span class="logo-marca"></span>
         <div>
-          <span class="label-mini">VEÍCULO EM FOCO</span>
-          <select id="dash-car-select" class="select-car"></select>
+          <h1>TELEMETRIA VEICULAR</h1>
+          <p class="sub">Sistema de aquisição e análise de dados do sensor</p>
         </div>
       </div>
-      <div>
-        <span class="label-mini">VEÍCULO</span>
-        <strong id="dash-modelo">—</strong>
-        <span id="dash-placa" class="placa">—</span>
+      <div style="display: flex; gap: 12px; align-items: center">
+        <div id="chip-veiculo" class="chip-veiculo hidden"></div>
+        <button id="btn-reset" class="btn btn-perigo-fantasma">
+          Resetar Sistema
+        </button>
       </div>
-      <div class="km-box">
-        <span class="label-mini">QUILOMETRAGEM</span>
-        <div class="km-linha">
-          <span id="dash-km" class="km-digitos">0</span><span class="km-unid">km</span>
+    </header>
+
+    <main>
+      <!-- ======= TELA: CADASTRO DO VEÍCULO + TESTES ======= -->
+      <section id="view-entrada" class="hidden">
+        <div class="card card-km">
+          <div class="form-grid form-grid-inline">
+            <label
+              >Modelo
+              <input
+                id="ent-modelo"
+                type="text"
+                placeholder="Ex.: Toyota Corolla XEI 2003"
+                autocomplete="off"
+              />
+            </label>
+            <label
+              >Placa
+              <input
+                id="ent-placa"
+                type="text"
+                placeholder="ABC-1D23"
+                maxlength="8"
+                autocomplete="off"
+              />
+            </label>
+            <label
+              >Quilometragem inicial (km)
+              <input
+                id="ent-km"
+                type="number"
+                min="0"
+                step="0.1"
+                placeholder="Ex.: 45230"
+              />
+            </label>
+            <label
+              >Data do teste
+              <input id="ent-data" type="date" />
+            </label>
+          </div>
+          <p id="cad-erro" class="erro hidden"></p>
         </div>
-      </div>
-      <button id="btn-voltar" class="btn btn-fantasma">← Editar medições</button>
-    </div>
 
-    <div class="card comparison-card">
-      <div class="card-head"><div><h2>COMPARAÇÃO DOS TESTES</h2><p class="card-sub">Resumo das três sessões de cada veículo</p></div></div>
-      <div class="tabela-wrap"><table class="tabela comparison-table"><thead><tr><th>TESTE</th><th id="compare-car-1">VEÍCULO 1</th><th>TEMP. 1</th><th>ACEL. 1</th><th id="compare-car-2">VEÍCULO 2</th><th>TEMP. 2</th><th>ACEL. 2</th></tr></thead><tbody id="comparacao"></tbody></table></div>
-    </div>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2 id="test-title">TESTE 1 DE 3</h2>
+              <p id="test-subtitle" class="card-sub">Veículo 1</p>
+            </div>
+            <div class="head-acoes">
+              <button id="btn-limpar" class="btn btn-perigo-fantasma">
+                Limpar Tudo
+              </button>
+            </div>
+          </div>
 
-    <div class="dash-grid">
-      <div class="card card-velocimetro">
-        <span class="label-mini">VELOCIDADE MÉDIA</span>
-        <svg id="velocimetro" viewBox="0 0 300 300">
-            <circle cx="150" cy="150" r="146" fill="#0d1117"/>
-            <circle cx="150" cy="150" r="146" fill="none" stroke="#2a323d" stroke-width="2"/>
-            <circle cx="150" cy="150" r="140" fill="none" stroke="#1f2733" stroke-width="1"/>
-            <circle cx="150" cy="150" r="128" fill="#05070a"/>
-            <circle cx="150" cy="150" r="126" fill="none" stroke="#1f2733" stroke-width="1"/>
-            <g id="ticks"></g>
-            <text x="150" y="198" fill="#454f5c" font-size="11" font-family="JetBrains Mono" font-weight="700"          letter-spacing="3" text-anchor="middle">KM/H</text>
-            <text id="vel-media-num" x="150" y="228" fill="#e6ebf2" font-size="28" font-weight="700" font-family="JetBrains Mono" text-anchor="middle">0</text>
-            <g id="ponteiro" transform="rotate(-120 150 150)">
-                <line x1="150" y1="150" x2="150" y2="53" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
-                <line x1="150" y1="150" x2="150" y2="174" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
-            </g>
-            <circle cx="150" cy="150" r="11" fill="#2a323d" stroke="#454f5c" stroke-width="2"/>
-            <circle cx="150" cy="150" r="4" fill="#8b96a3"/>
-        </svg>
-    </div>
+          <div class="tabela-wrap">
+            <table class="tabela">
+              <thead>
+                <tr>
+                  <th>TESTE</th>
+                  <th>TEMPO (S)</th>
+                  <th>VELOCIDADE</th>
+                  <th>TEMP. MOTOR</th>
+                  <th>ACELERAÇÃO</th>
+                  <th>FORÇA DE GIRO</th>
+                  <th>AÇÕES</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
 
-      <div class="dash-stats">
-        <div class="card stat">
-          <span class="label-mini">ACELERAÇÃO MÉDIA</span>
-          <div class="stat-valor"><span id="st-acel">0.00</span><small>m/s²</small></div>
-          <div class="barra"><div id="bar-acel" class="barra-fill verde"></div></div>
+          <div id="aviso-erro" class="aviso-erro hidden"></div>
+          <div id="aviso-nuvem" class="aviso-nuvem hidden"></div>
+
+          <div class="acoes-fim">
+            <button id="btn-validar" class="btn btn-fantasma">
+              Validar Dados
+            </button>
+            <button id="btn-compilar" class="btn btn-verde">
+              Salvar teste e continuar →
+            </button>
+          </div>
         </div>
-        <div class="card stat">
-          <span class="label-mini">VELOCIDADE MÁXIMA</span>
-          <div class="stat-valor"><span id="st-vmax">0</span><small>km/h</small></div>
-          <div class="barra"><div id="bar-vmax" class="barra-fill vermelha"></div></div>
+      </section>
+
+      <!-- ======= TELA 3: DASHBOARD ======= -->
+      <section id="view-dashboard" class="hidden">
+        <div class="card card-km">
+          <div class="dashboard-heading">
+            <div>
+              <span class="label-mini">VEÍCULO EM FOCO</span>
+              <select id="dash-car-select" class="select-car"></select>
+            </div>
+          </div>
+          <div>
+            <span class="label-mini">VEÍCULO</span>
+            <strong id="dash-modelo">—</strong>
+            <span id="dash-placa" class="placa">—</span>
+          </div>
+          <div class="km-box">
+            <span class="label-mini">QUILOMETRAGEM</span>
+            <div class="km-linha">
+              <span id="dash-km" class="km-digitos">0</span
+              ><span class="km-unid">km</span>
+            </div>
+          </div>
+          <button id="btn-voltar" class="btn btn-fantasma">
+            ← Editar medições
+          </button>
         </div>
-        <div class="card stat">
-          <span class="label-mini">TEMPERATURA MÉDIA DO MOTOR</span>
-          <div class="stat-valor"><span id="st-temp">0</span><small>°C</small></div>
-          <div class="barra"><div id="bar-temp" class="barra-fill ambar"></div></div>
+
+        <div class="card comparison-card">
+          <div class="tabela-wrap">
+            <table class="tabela comparison-table">
+              <thead>
+                <tr>
+                  <th>TESTE</th>
+                  <th id="compare-data-1">DATA</th>
+                  <th id="compare-data-2">DATA</th>
+                  <th id="compare-tempo-1">TEMPO (S)</th>
+                  <th id="compare-tempo-2">TEMPO (S)</th>
+                  <th id="compare-vel-1">VELOCIDADE</th>
+                  <th id="compare-vel-2">VELOCIDADE</th>
+                  <th id="compare-temp-1">TEMP. MOTOR</th>
+                  <th id="compare-temp-2">TEMP. MOTOR</th>
+                  <th id="compare-acel-1">ACELERAÇÃO</th>
+                  <th id="compare-acel-2">ACELERAÇÃO</th>
+                </tr>
+              </thead>
+              <tbody id="comparacao"></tbody>
+            </table>
+          </div>
         </div>
-        <button id="btn-graficos" class="btn btn-fantasma btn-grande">Mostrar gráficos ▾</button>
-      </div>
-    </div>
 
-    <div id="graficos" class="graficos hidden">
-      <div class="card"><h3>Velocidade × Tempo</h3><canvas id="g-vel" height="220"></canvas></div>
-      <div class="card"><h3>Aceleração × Tempo</h3><canvas id="g-acel" height="220"></canvas></div>
-      <div class="card"><h3>Temperatura × Tempo</h3><canvas id="g-temp" height="220"></canvas></div>
-    </div>
-  </section>
+        <div class="dash-grid">
+          <div class="card card-velocimetro">
+            <span class="label-mini">VELOCIDADE MÉDIA</span>
+            <svg id="velocimetro" viewBox="0 0 300 300">
+              <circle cx="150" cy="150" r="146" fill="#0d1117" />
+              <circle
+                cx="150"
+                cy="150"
+                r="146"
+                fill="none"
+                stroke="#2a323d"
+                stroke-width="2"
+              />
+              <circle
+                cx="150"
+                cy="150"
+                r="140"
+                fill="none"
+                stroke="#1f2733"
+                stroke-width="1"
+              />
+              <circle cx="150" cy="150" r="128" fill="#05070a" />
+              <circle
+                cx="150"
+                cy="150"
+                r="126"
+                fill="none"
+                stroke="#1f2733"
+                stroke-width="1"
+              />
+              <g id="ticks"></g>
+              <text
+                x="150"
+                y="198"
+                fill="#454f5c"
+                font-size="11"
+                font-family="JetBrains Mono"
+                font-weight="700"
+                letter-spacing="3"
+                text-anchor="middle"
+              >
+                KM/H
+              </text>
+              <text
+                id="vel-media-num"
+                x="150"
+                y="228"
+                fill="#e6ebf2"
+                font-size="28"
+                font-weight="700"
+                font-family="JetBrains Mono"
+                text-anchor="middle"
+              >
+                0
+              </text>
+              <g id="ponteiro" transform="rotate(-120 150 150)">
+                <line
+                  x1="150"
+                  y1="150"
+                  x2="150"
+                  y2="53"
+                  stroke="#ef4444"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                />
+                <line
+                  x1="150"
+                  y1="150"
+                  x2="150"
+                  y2="174"
+                  stroke="#ef4444"
+                  stroke-width="5"
+                  stroke-linecap="round"
+                />
+              </g>
+              <circle
+                cx="150"
+                cy="150"
+                r="11"
+                fill="#2a323d"
+                stroke="#454f5c"
+                stroke-width="2"
+              />
+              <circle cx="150" cy="150" r="4" fill="#8b96a3" />
+            </svg>
+          </div>
 
-</main>
+          <div class="dash-stats">
+            <div class="card stat">
+              <span class="label-mini">ACELERAÇÃO MÉDIA</span>
+              <div class="stat-valor">
+                <span id="st-acel">0.00</span><small>m/s²</small>
+              </div>
+              <div class="barra">
+                <div id="bar-acel" class="barra-fill verde"></div>
+              </div>
+            </div>
+            <div class="card stat">
+              <span class="label-mini">VELOCIDADE MÁXIMA</span>
+              <div class="stat-valor">
+                <span id="st-vmax">0</span><small>km/h</small>
+              </div>
+              <div class="barra">
+                <div id="bar-vmax" class="barra-fill vermelha"></div>
+              </div>
+            </div>
+            <div class="card stat">
+              <span class="label-mini">TEMPERATURA MÉDIA DO MOTOR</span>
+              <div class="stat-valor">
+                <span id="st-temp">0</span><small>°C</small>
+              </div>
+              <div class="barra">
+                <div id="bar-temp" class="barra-fill ambar"></div>
+              </div>
+            </div>
+            <button id="btn-graficos" class="btn btn-fantasma btn-grande">
+              Mostrar gráficos ▾
+            </button>
+          </div>
+        </div>
 
-<script src="script.js"></script>
-</body>
+        <div id="graficos" class="graficos hidden">
+          <div class="card">
+            <h3>Velocidade × Tempo</h3>
+            <canvas id="g-vel" height="220"></canvas>
+          </div>
+          <div class="card">
+            <h3>Aceleração × Tempo</h3>
+            <canvas id="g-acel" height="220"></canvas>
+          </div>
+          <div class="card">
+            <h3>Temperatura × Tempo</h3>
+            <canvas id="g-temp" height="220"></canvas>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
 </html>
