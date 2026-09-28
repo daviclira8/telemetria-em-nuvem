@@ -2,11 +2,30 @@
 
 ## 📌 Sobre o projeto
 
-Este projeto consiste no desenvolvimento de uma plataforma de registro, armazenamento e análise de dados de telemetria utilizando computação em nuvem.
+Este projeto consiste no desenvolvimento de uma plataforma full-stack de registro, armazenamento e análise de dados de telemetria utilizando computação em nuvem.
 
 A proposta é permitir que dados reais obtidos durante testes de um veículo ou sistema experimental sejam inseridos na plataforma, armazenados de forma centralizada e posteriormente analisados e comparados entre diferentes sessões de teste.
 
-O projeto tem como foco principal demonstrar como a computação em nuvem pode solucionar problemas relacionados ao armazenamento, acesso, organização e análise de dados de telemetria.
+Esta arquitetura foi desenhada para integrar uma interface web em **HTML/JS puro**, um servidor em **FastAPI (Python)** e um banco de dados relacional **PostgreSQL**. Assim, permitindo que os dados de testes de desempenho de veículos sejam inseridos, validados, armazenados e comparados entre si em um dashboard interativo.
+
+Dessa forma, o projeto tem como foco principal demonstrar como a computação em nuvem pode solucionar problemas relacionados ao armazenamento, acesso, organização e análise de dados de telemetria.
+
+---
+
+## 🏗️ Arquitetura Integrada do Sistema
+
+O fluxo de dados da aplicação ocorre através da seguinte integração:
+
+[ Navegador / Frontend (HTML/JS) ] 
+       |  (Requisições HTTP POST/GET com JSON)
+       V
+[ Servidor FastAPI (backend/main.py) ] 
+       |  (Validação de dados com Pydantic + Tratamento de Erros)
+       V
+[ Conexão & Driver (backend/database.py + .env) ] 
+       |  (Pool de conexões via SQLAlchemy + psycopg2)
+       V
+[ Banco de Dados PostgreSQL (Tabelas: veiculos, sessoes_teste, telemetria_motor) ]
 
 ---
 
@@ -67,7 +86,9 @@ Teste 02
 
 Essa organização permitirá comparar diferentes sessões e identificar alterações no comportamento do sistema.
 
+
 ---
+
 
 ## 🛠️ Tecnologias utilizadas
 
@@ -87,7 +108,41 @@ O PostgreSQL será utilizado como banco de dados da aplicação. Ele será respo
 
 O frontend será responsável pela interação com o usuário. HTML é responsável pela estrutura das páginas e formulários. CSS é responsável pela organização visual e apresentação da aplicação. JavaScript é responsável por: enviar dados para a API, consultar informações, atualizar o dashboard, construir gráficos e realizar comparações.
 
+
 ---
+
+
+## 🛠️ Abordagem técnica do código
+
+### 1. Camada de configuração e conexão (`backend/database.py`)
+
+Responsável por estabelecer a ponte segura com o banco de dados PostgreSQL:
+* Carrega as credenciais sensíveis isoladas no arquivo `.env` utilizando a biblioteca `python-dotenv`;
+* Configura o motor de conexão adaptando a URL para o driver otimizado do PostgreSQL;
+* Instancia a fábrica de sessões controlando transações unitárias com `autocommit=False` para garantir a integridade dos dados inseridos.
+
+### 2. API e rotas (`backend/main.py`)
+
+O "cérebro" backend desenvolvido em FastAPI que gerencia os endpoints HTTP:
+* O **CORS Middleware** faz o gerenciamento das permissões de acesso cruzado permitindo que o frontend local (portas `5500` do Live Server) ou ambientes de homologação interajam com a API;
+* Os **modelos pydantic (`Measurement` e `SessionCreate`)** validam os tipos de dados recebidos antes de permitir a escrita no banco;
+* Os **endpoints de gravação (`/api/sessions` e `/api/measurements`)** inserem os dados das sessões de teste e recuperam o ID gerado, amarrando cada linha de telemetria ao seu respectivo teste relacionalmente;
+* O **tratamento de exceções** captura erros de integridade, retorna códigos HTTP padronizados e possui um manipulador de erros com depuração via `traceback`.
+
+### 3. Ponte Serverless para Nuvem (`api/index.py`)
+
+* É um ponto de entrada - `from backend.main import app` - para que o **Vercel** consiga localizar e executar a aplicação FastAPI sem grandes problemas.
+
+### 4. Interface e Lógica (`frontend/index.html` e `script.js`)
+* **Preservação do estado atual**: Utiliza o `localStorage` do navegador para manter o progresso do usuário persistido mesmo se a página for recarregada acidentalmente;
+* **Cálculos dinâmicos**: Processa em tempo real a aceleração instantânea entre os intervalos de tempo e a distância percorrida por integração trapezoidal das velocidades;
+* **Comunicação assíncrona**: Envia os blocos de testes validados para o backend através de requisições `fetch` estruturadas em JSON;
+* **Renderização Gráfica**: Gráficos analíticos dinâmicos otimizados via HTML5 Canvas e animações fluidas baseadas em vetores SVG para o velocímetro de velocidade média.
+
+Para mais detalhes sobre a estrutura e funcionamento do código, é possível observar comentários por seção ou linha a linha nos códigos de API, Backend, Frontend e Banco de Dados.
+
+---
+
 
 ### 📊 Dashboard
 
