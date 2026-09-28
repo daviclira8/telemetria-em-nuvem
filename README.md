@@ -165,5 +165,10 @@ Além disso, poderão ser utilizados gráficos como:
 - Aceleração × Tempo;
 - Velocidade × Temperatura.
 
+---
+
+Desenvolvido por Vítor, Davi e Carmen, para o processo seletivo do PET ENG COMP UFC.
+
+https://telemetria-veicular.vercel.app
 
 
