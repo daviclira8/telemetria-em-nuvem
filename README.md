@@ -137,7 +137,7 @@ O "cérebro" backend desenvolvido em FastAPI que gerencia os endpoints HTTP:
 * **Preservação do estado atual**: Utiliza o `localStorage` do navegador para manter o progresso do usuário persistido mesmo se a página for recarregada acidentalmente;
 * **Cálculos dinâmicos**: Processa em tempo real a aceleração instantânea entre os intervalos de tempo e a distância percorrida por integração trapezoidal das velocidades;
 * **Comunicação assíncrona**: Envia os blocos de testes validados para o backend através de requisições `fetch` estruturadas em JSON;
-* **Renderização Gráfica**: Gráficos analíticos dinâmicos otimizados via HTML5 Canvas e animações fluidas baseadas em vetores SVG para o velocímetro de velocidade média.
+* **Renderização gráfica**: Gráficos analíticos dinâmicos otimizados via HTML5 Canvas e animações fluidas baseadas em vetores SVG para o velocímetro de velocidade média.
 
 Para mais detalhes sobre a estrutura e funcionamento do código, é possível observar comentários por seção ou linha a linha nos códigos de API, Backend, Frontend e Banco de Dados.
 
