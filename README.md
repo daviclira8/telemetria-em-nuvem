@@ -15,7 +15,7 @@ Dessa forma, o projeto tem como foco principal demonstrar como a computação em
 ## 🏗️ Arquitetura Integrada do Sistema
 
 O fluxo de dados da aplicação ocorre através da seguinte integração:
-
+```
 [ Navegador / Frontend (HTML/JS) ] 
        |  (Requisições HTTP POST/GET com JSON)
        V
@@ -26,7 +26,7 @@ O fluxo de dados da aplicação ocorre através da seguinte integração:
        |  (Pool de conexões via SQLAlchemy + psycopg2)
        V
 [ Banco de Dados PostgreSQL (Tabelas: veiculos, sessoes_teste, telemetria_motor) ]
-
+```
 ---
 
 ## 🎯 Objetivos
